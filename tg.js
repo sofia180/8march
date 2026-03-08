@@ -19,7 +19,12 @@
   }
 
   async function verifyInitData() {
-    if (!tg || !tg.initData) return null;
+    if (!tg) return null;
+    // Если initData пусто, попробуем использовать initDataUnsafe (может работать в десктопе).
+    if (!tg.initData && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+      return { user: tg.initDataUnsafe.user, verified: false };
+    }
+    if (!tg.initData) return null;
     try {
       const res = await fetch('/api/tg-verify', {
         method: 'POST',
@@ -27,9 +32,13 @@
         body: JSON.stringify({ initData: tg.initData })
       });
       const data = await res.json();
-      if (data.ok) return data.user;
+      if (data.ok) return { user: data.user, verified: true };
     } catch (e) {
       console.warn('tg verify failed', e);
+      // fallback: использовать initDataUnsafe без верификации
+      if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+        return { user: tg.initDataUnsafe.user, verified: false };
+      }
     }
     return null;
   }
@@ -176,9 +185,12 @@
     db = initFirebase().db;
     const statusEl = document.getElementById('tgStatus');
 
-    tgUser = await verifyInitData();
+    const verifyRes = await verifyInitData();
+    tgUser = verifyRes && verifyRes.user;
     if (tgUser) {
-      statusEl.textContent = `Подключено: @${tgUser.username || tgUser.id}`;
+      statusEl.textContent = verifyRes.verified
+        ? `Подключено: @${tgUser.username || tgUser.id}`
+        : `Подключено (без верификации): @${tgUser.username || tgUser.id}`;
       const nameField = document.getElementById('name');
       const photoField = document.getElementById('photo');
       if (nameField && !nameField.value) nameField.value = tgUser.username ? `@${tgUser.username}` : tgUser.first_name || '';
