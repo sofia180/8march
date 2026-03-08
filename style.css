@@ -226,6 +226,12 @@ label { font-weight: 600; color: var(--muted); display: block; margin-bottom: 6p
 .gift-item .status.sent { background: rgba(123,237,159,0.14); color: #96f4c0; }
 .gift-actions { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
 
+/* Telegram compact view tweaks */
+body[data-page="tg"] .card { padding: 12px; }
+body[data-page="tg"] .gift-item { flex-direction: column; align-items: stretch; }
+body[data-page="tg"] .gift-item .title a { max-width: 100%; word-break: break-word; }
+body[data-page="tg"] #giftList .card { padding: 10px; }
+
 .top-list { list-style: none; padding: 0; margin: 0; }
 .top-list li { padding: 12px 10px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; }
 .top-list li:last-child { border-bottom: none; }

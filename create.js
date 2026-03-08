@@ -68,10 +68,11 @@
     gifts.forEach((g) => {
       const div = document.createElement('div');
       div.className = 'card';
+      const shortLink = g.link.length > 60 ? g.link.slice(0, 57) + '…' : g.link;
       div.innerHTML = `
         <div class="gift-item">
           <div style="flex:1;">
-            <div class="title">${g.link}</div>
+            <div class="title" title="${g.link}">${shortLink}</div>
             <div class="small">${t('status.needed')}</div>
           </div>
           <button class="btn ghost" data-remove="${g.id}">✕</button>
