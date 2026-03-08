@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WishDrop — Вишлисты к 8 марта</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore-compat.js"></script>
+  <script src="app.js" defer></script>
+</head>
+<body data-page="index">
+  <header class="nav">
+    <div class="brand">✨ WishDrop</div>
+    <div class="flex wrap">
+      <select id="langSwitch" aria-label="Language">
+        <option value="ru">RU</option>
+        <option value="en">EN</option>
+      </select>
+      <a class="btn ghost" href="https://wishdrop.app" target="_blank" rel="noopener" data-i18n="nav.about">О продукте</a>
+      <a class="btn" href="create.html" data-i18n="nav.create">Создать вишлист</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1 data-i18n="hero.title">Подарочные вишлисты, которые доходят вовремя</h1>
+      <p data-i18n="hero.subtitle">Создайте свою страницу, добавьте подарки и делитесь ссылкой. Друзья и подписчики увидят, что ещё нужно, могут зарезервировать и отправить подарок — а топ-лист обновится мгновенно.</p>
+      <div class="countdown" id="countdown"></div>
+      <div class="flex wrap">
+        <a class="btn" href="create.html" data-i18n="cta.create">Создать вишлист</a>
+        <a class="btn secondary" href="#search" data-i18n="cta.find">Найти друзей</a>
+      </div>
+    </section>
+
+    <section class="section" id="search">
+      <div class="flex wrap" style="justify-content: space-between; align-items: center; gap: 12px;">
+        <h2 data-i18n="search.title">Глобальный поиск</h2>
+        <span class="badge dark" data-i18n="search.badge">Живые данные через Firebase</span>
+      </div>
+      <input class="input" id="searchInput" type="search" placeholder="Введите имя..." autocomplete="off" data-i18n-placeholder="search.placeholder" />
+      <div class="grid" id="searchResults" style="margin-top: 16px;"></div>
+      <p class="small" id="searchEmpty" style="display:none;" data-i18n="search.empty">Ничего не найдено. Попробуйте другое имя.</p>
+    </section>
+
+    <section class="section">
+      <div class="flex wrap" style="justify-content: space-between; align-items: center; gap: 12px;">
+        <h2 data-i18n="top.title">Топ получателей</h2>
+        <span class="small" data-i18n="top.sub">Обновляется в реальном времени</span>
+      </div>
+      <ol class="top-list" id="topList"></ol>
+    </section>
+  </main>
+
+  <footer>
+    <span data-i18n="footer.text">WishDrop · Вирусный MVP к 8 марта · Сделано с заботой</span>
+  </footer>
+
+  <div class="toast" id="toast"></div>
+</body>
+</html>

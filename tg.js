@@ -1,0 +1,168 @@
+(function() {
+  const { initFirebase, isDemoMode, loadDemo, saveDemo, seedDemoIfEmpty, toast, t } = window.wishdrop;
+  const tg = window.Telegram && window.Telegram.WebApp;
+  let db = null;
+  let gifts = [];
+  let tgUser = null;
+  const MAX_NAME = 80;
+  const MAX_ABOUT = 280;
+
+  function applyTgTheme() {
+    if (!tg) return;
+    tg.ready();
+    tg.expand();
+    const theme = tg.themeParams || {};
+    document.body.style.setProperty('--bg', '#0d1b2a');
+    if (theme.bg_color) document.body.style.backgroundColor = theme.bg_color;
+  }
+
+  async function verifyInitData() {
+    if (!tg || !tg.initData) return null;
+    try {
+      const res = await fetch('/api/tg-verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ initData: tg.initData })
+      });
+      const data = await res.json();
+      if (data.ok) return data.user;
+    } catch (e) {
+      console.warn('tg verify failed', e);
+    }
+    return null;
+  }
+
+  function isValidUrl(url) {
+    try {
+      const u = new URL(url);
+      return u.protocol === 'https:';
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function renderGifts() {
+    const container = document.getElementById('giftList');
+    if (!container) return;
+    container.innerHTML = '';
+    if (!gifts.length) {
+      container.innerHTML = '<p class="small">Добавьте хотя бы одну ссылку на подарок.</p>';
+      return;
+    }
+    gifts.forEach((g) => {
+      const div = document.createElement('div');
+      div.className = 'card';
+      div.innerHTML = `
+        <div class="gift-item">
+          <div style="flex:1;">
+            <div class="title">${g.link}</div>
+            <div class="small">ещё нужно</div>
+          </div>
+          <button class="btn ghost" data-remove="${g.id}">✕</button>
+        </div>`;
+      container.appendChild(div);
+    });
+    container.querySelectorAll('[data-remove]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        gifts = gifts.filter(g => g.id !== btn.dataset.remove);
+        renderGifts();
+      });
+    });
+  }
+
+  async function saveProfile() {
+    const name = document.getElementById('name').value.trim();
+    const photo = document.getElementById('photo').value.trim();
+    const about = document.getElementById('about').value.trim();
+    if (!name) { toast('Введите имя'); return; }
+    if (name.length > MAX_NAME || about.length > MAX_ABOUT) { toast('Слишком длинное поле'); return; }
+    if (!gifts.length) { toast('Добавьте хотя бы один подарок'); return; }
+
+    const id = crypto.randomUUID();
+    const baseData = {
+      name,
+      photo,
+      about,
+      searchName: name.toLowerCase(),
+      sentCount: 0,
+      createdAt: Date.now(),
+      tgId: tgUser?.id || null,
+      tgUsername: tgUser?.username || null,
+      tgName: [tgUser?.first_name, tgUser?.last_name].filter(Boolean).join(' ')
+    };
+
+    if (isDemoMode()) {
+      seedDemoIfEmpty();
+      const data = loadDemo();
+      data.users[id] = { ...baseData, id, gifts: [...gifts] };
+      saveDemo(data);
+      toast('Сохранено (демо)');
+      setTimeout(() => location.href = `card.html?id=${id}`, 300);
+      return;
+    }
+
+    if (!db) db = initFirebase().db;
+    const userRef = db.collection('users').doc();
+    const batch = db.batch();
+    batch.set(userRef, baseData);
+    gifts.forEach(g => {
+      const giftRef = userRef.collection('gifts').doc(g.id);
+      batch.set(giftRef, {
+        link: g.link,
+        status: 'needed',
+        donor: '',
+        addedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    });
+    try {
+      await batch.commit();
+      toast('Профиль создан!');
+      setTimeout(() => location.href = `card.html?id=${userRef.id}`, 300);
+    } catch (e) {
+      console.error(e);
+      toast('Ошибка сохранения, проверьте ключи Firebase');
+    }
+  }
+
+  async function setupTgPage() {
+    applyTgTheme();
+    db = initFirebase().db;
+    const statusEl = document.getElementById('tgStatus');
+
+    tgUser = await verifyInitData();
+    if (tgUser) {
+      statusEl.textContent = `Подключено: @${tgUser.username || tgUser.id}`;
+      const nameField = document.getElementById('name');
+      const photoField = document.getElementById('photo');
+      if (nameField && !nameField.value) nameField.value = tgUser.username ? `@${tgUser.username}` : tgUser.first_name || '';
+      if (photoField && tgUser.photo_url && !photoField.value) photoField.value = tgUser.photo_url;
+    } else {
+      statusEl.textContent = 'Не удалось подтвердить Telegram, можно заполнить вручную.';
+    }
+
+    document.getElementById('tgClose').addEventListener('click', () => tg && tg.close());
+    document.getElementById('addGift').addEventListener('click', (e) => {
+      e.preventDefault();
+      const url = document.getElementById('giftUrl').value.trim();
+      if (!url) return toast('Вставьте ссылку');
+      if (!isValidUrl(url)) return toast('Введите корректную https ссылку');
+      gifts.push({ id: crypto.randomUUID(), link: url, status: 'needed' });
+      document.getElementById('giftUrl').value = '';
+      renderGifts();
+    });
+    document.getElementById('saveProfile').addEventListener('click', (e) => { e.preventDefault(); saveProfile(); });
+    document.getElementById('resetForm').addEventListener('click', () => { document.getElementById('giftUrl').value=''; document.getElementById('about').value=''; document.getElementById('photo').value=''; renderGifts(); });
+    document.getElementById('shareTg').addEventListener('click', () => {
+      if (tg && tg.shareMessage) {
+        tg.shareMessage('Смотри мой вишлист в WishDrop 👉 https://8march.extender.cards');
+      } else {
+        toast('Поделиться можно через кнопку внутри Telegram');
+      }
+    });
+    renderGifts();
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    if (document.body.dataset.page === 'tg') setupTgPage();
+  });
+})();

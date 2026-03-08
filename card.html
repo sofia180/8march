@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WishDrop — Вишлист</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore-compat.js"></script>
+  <script src="app.js" defer></script>
+  <script src="card.js" defer></script>
+</head>
+<body data-page="card">
+  <header class="nav">
+    <div class="brand">✨ WishDrop</div>
+    <div class="flex wrap">
+      <select id="langSwitch" aria-label="Language">
+        <option value="ru">RU</option>
+        <option value="en">EN</option>
+      </select>
+      <a class="btn ghost" href="index.html" data-i18n="nav.all">Все вишлисты</a>
+      <button class="btn" id="shareBtn" data-i18n="nav.share">Поделиться</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="profileBlock">
+      <div class="flex wrap" style="align-items: center; gap: 16px;">
+        <img id="profilePhoto" class="avatar avatar-lg" src="https://placehold.co/120x120?text=Wish" alt="avatar" />
+        <div>
+          <h1 id="profileName">Имя</h1>
+          <p id="profileAbout" class="small" data-i18n="card.profile.noAbout">Описание пользователя появится здесь.</p>
+          <div class="flex wrap small" id="socials"></div>
+          <div class="share-box">
+            <input class="input" id="shareLink" readonly />
+            <button class="btn secondary" id="copyLink" data-i18n="share.copy">Копировать</button>
+          </div>
+        </div>
+      </div>
+      <div class="badge dark" id="statusBadge" data-i18n="card.status.loading">Загрузка...</div>
+    </section>
+
+    <section class="section">
+      <div class="flex wrap" style="justify-content: space-between; align-items: center;">
+        <h2 data-i18n="card.gifts.title">Подарки</h2>
+        <span class="small" id="giftCounter">0</span>
+      </div>
+      <div id="giftContainer" class="grid"></div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+</body>
+</html>

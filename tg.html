@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>WishDrop · Telegram</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore-compat.js"></script>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="app.js" defer></script>
+  <script src="tg.js" defer></script>
+</head>
+<body data-page="tg" style="background: var(--bg);">
+  <main style="padding: 16px 16px 48px; max-width: 720px; margin: 0 auto;">
+    <header class="nav" style="position: static; padding: 12px 16px; box-shadow: none; background: rgba(13,27,42,0.85);">
+      <div class="brand">✨ WishDrop · TG</div>
+      <div class="flex wrap">
+        <button class="btn ghost" id="tgClose">Закрыть</button>
+      </div>
+    </header>
+
+    <section class="section" style="margin-top:12px;">
+      <h2 style="margin-top:0;">Создай свой вишлист</h2>
+      <p class="small" id="tgStatus">Загружаю профиль Telegram…</p>
+      <div class="form-grid" id="tgForm">
+        <div>
+          <label for="name">Имя</label>
+          <input class="input" id="name" required maxlength="60" placeholder="Ваше имя" />
+        </div>
+        <div>
+          <label for="photo">Фото (URL)</label>
+          <input class="input" id="photo" type="url" placeholder="https://...jpg" />
+        </div>
+        <div>
+          <label for="about">Описание</label>
+          <textarea id="about" rows="3" maxlength="200" placeholder="Что любите получать?"></textarea>
+        </div>
+      </div>
+
+      <div class="section" style="margin-top: 14px; background: rgba(255,255,255,0.02);">
+        <h3 style="margin-top:0;">Подарки</h3>
+        <div class="flex wrap">
+          <input class="input" id="giftUrl" placeholder="Вставьте ссылку на подарок" />
+          <button class="btn" id="addGift">Добавить</button>
+        </div>
+        <div id="giftList" style="margin-top: 12px;" class="grid"></div>
+      </div>
+
+      <div class="flex wrap" style="margin-top: 14px;">
+        <button class="btn" id="saveProfile">Сохранить</button>
+        <button class="btn secondary" id="resetForm">Сбросить</button>
+        <button class="btn ghost" id="shareTg">Поделиться</button>
+      </div>
+    </section>
+  </main>
+  <div class="toast" id="toast"></div>
+</body>
+</html>

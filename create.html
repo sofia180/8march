@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WishDrop — Создать вишлист</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore-compat.js"></script>
+  <script src="app.js" defer></script>
+  <script src="create.js" defer></script>
+</head>
+<body data-page="create">
+  <header class="nav">
+    <div class="brand">✨ WishDrop</div>
+    <div class="flex wrap">
+      <select id="langSwitch" aria-label="Language">
+        <option value="ru">RU</option>
+        <option value="en">EN</option>
+      </select>
+      <a class="btn ghost" href="index.html" data-i18n="nav.home">На главную</a>
+      <a class="btn" href="card.html" id="previewLink" data-i18n="nav.preview">Предпросмотр</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="flex wrap" style="justify-content: space-between; align-items: center; gap: 12px;">
+      <div> 
+        <h2 data-i18n="create.title">Создайте свою страницу</h2>
+        <p class="small" data-i18n="create.subtitle">Данные хранятся глобально через Firebase. Заполните поля, добавьте подарки, подключите соцсети.</p>
+      </div>
+      <span class="badge dark" id="demoBadge" style="display:none;" data-i18n="badge.demo">Демо-режим (localStorage)</span>
+    </div>
+      <form id="createForm" class="form-grid" autocomplete="off">
+        <div>
+          <label for="name" data-i18n="create.name">Имя</label>
+          <input class="input" id="name" required maxlength="60" placeholder="Например, Анна" data-i18n-placeholder="create.name.ph" />
+        </div>
+        <div>
+          <label for="photo" data-i18n="create.photo">Фото (URL)</label>
+          <input class="input" id="photo" type="url" placeholder="https://...jpg" data-i18n-placeholder="create.photo.ph" />
+        </div>
+        <div>
+          <label for="about" data-i18n="create.about">Описание</label>
+          <textarea id="about" rows="3" maxlength="280" placeholder="Расскажите, что любите и чем увлекаетесь" data-i18n-placeholder="create.about.ph"></textarea>
+        </div>
+    </form>
+
+    <div class="flex wrap" style="margin-top: 12px;">
+      <button class="btn secondary" id="connectInsta" data-i18n="create.connectInsta">Подключить Instagram</button>
+      <button class="btn secondary" id="connectTg" data-i18n="create.connectTg">Подключить Telegram</button>
+      <div id="tgWidget"></div>
+    </div>
+
+      <div class="section" style="margin-top: 18px; background: rgba(255,255,255,0.02);">
+        <h3 style="margin-top:0;" data-i18n="create.gifts">Подарки</h3>
+        <div class="flex wrap">
+          <input class="input" id="giftUrl" placeholder="Вставьте ссылку на подарок" data-i18n-placeholder="create.gift.ph" />
+          <button class="btn" id="addGift" data-i18n="create.giftAdd">Добавить</button>
+        </div>
+        <div id="giftList" style="margin-top: 12px;" class="grid"></div>
+      </div>
+
+      <div class="flex wrap" style="margin-top: 18px;">
+        <button class="btn" id="saveProfile" data-i18n="create.save">Сохранить и получить ссылку</button>
+        <button class="btn ghost" type="button" id="resetForm" data-i18n="create.reset">Очистить</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+</body>
+</html>
