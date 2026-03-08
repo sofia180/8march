@@ -179,7 +179,13 @@
       setTimeout(() => location.href = `card.html?id=${userRef.id}`, 400);
     } catch (e) {
       console.error(e);
-      toast(t('toast.saveError'));
+      // fallback в демо, чтобы не потерять введённые данные
+      seedDemoIfEmpty();
+      const data = loadDemo();
+      data.users[userRef.id] = { ...baseData, id: userRef.id, gifts: [...gifts] };
+      saveDemo(data);
+      toast(t('toast.firebaseBlocked'));
+      setTimeout(() => location.href = `card.html?id=${userRef.id}`, 400);
     }
   }
 
