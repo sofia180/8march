@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WishDrop — Галерея подарков</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore-compat.js"></script>
+  <script src="app.js" defer></script>
+  <script src="gallery.js" defer></script>
+</head>
+<body data-page="gallery">
+  <header class="nav">
+    <div class="brand">✨ WishDrop</div>
+    <div class="flex wrap">
+      <a class="btn ghost" id="backToCard">К вишлисту</a>
+    </div>
+  </header>
+  <main>
+    <section class="section">
+      <h2>Галерея подарков</h2>
+      <p class="small">Тапните на картинку, чтобы перейти к товару.</p>
+      <div id="galleryGrid" class="grid"></div>
+      <p class="small" id="galleryEmpty" style="display:none;">Подарков пока нет.</p>
+    </section>
+  </main>
+  <div class="toast" id="toast"></div>
+</body>
+</html>
