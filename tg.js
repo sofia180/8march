@@ -6,6 +6,8 @@
   let tgUser = null;
   const MAX_NAME = 80;
   const MAX_ABOUT = 280;
+  const MAX_FILE = 3 * 1024 * 1024;
+  let fileToUpload = null;
 
   function applyTgTheme() {
     if (!tg) return;
@@ -39,6 +41,35 @@
     } catch (_) {
       return false;
     }
+  }
+
+  function handleFileInput(file) {
+    if (!file) return;
+    if (file.size > MAX_FILE) {
+      toast('Файл больше 3 МБ');
+      fileToUpload = null;
+      document.getElementById('photoFile').value = '';
+      return;
+    }
+    if (!(file.type.startsWith('image/') || file.type === 'application/pdf')) {
+      toast('Только изображения или PDF');
+      fileToUpload = null;
+      document.getElementById('photoFile').value = '';
+      return;
+    }
+    fileToUpload = file;
+  }
+
+  async function uploadFile(userId) {
+    if (!fileToUpload) return { photoUrl: null, photoPdf: null };
+    const isPdf = fileToUpload.type === 'application/pdf';
+    const ext = isPdf ? 'pdf' : (fileToUpload.name.split('.').pop() || 'jpg');
+    const path = `avatars/${userId}.${ext}`;
+    const storage = firebase.storage();
+    const ref = storage.ref().child(path);
+    await ref.put(fileToUpload);
+    const url = await ref.getDownloadURL();
+    return { photoUrl: isPdf ? 'https://placehold.co/200x200?text=Photo' : url, photoPdf: isPdf ? url : null };
   }
 
   function renderGifts() {
@@ -103,6 +134,16 @@
 
     if (!db) db = initFirebase().db;
     const userRef = db.collection('users').doc();
+    if (fileToUpload) {
+      try {
+        const uploaded = await uploadFile(userRef.id);
+        baseData.photo = uploaded.photoUrl || baseData.photo;
+        baseData.photoPdf = uploaded.photoPdf || null;
+      } catch (e) {
+        console.error(e);
+        toast('Не удалось загрузить файл');
+      }
+    }
     const batch = db.batch();
     batch.set(userRef, baseData);
     gifts.forEach(g => {
@@ -165,6 +206,10 @@
         toast('Поделиться можно через кнопку внутри Telegram');
       }
     });
+    const photoFileInput = document.getElementById('photoFile');
+    if (photoFileInput) {
+      photoFileInput.addEventListener('change', (e) => handleFileInput(e.target.files[0]));
+    }
     renderGifts();
   }
 
