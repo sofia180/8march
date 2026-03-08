@@ -120,7 +120,13 @@
       setTimeout(() => location.href = `card.html?id=${userRef.id}`, 300);
     } catch (e) {
       console.error(e);
-      toast('Ошибка сохранения, проверьте ключи Firebase');
+      // fallback в демо, чтобы не терять ввод
+      seedDemoIfEmpty();
+      const data = loadDemo();
+      data.users[userRef.id] = { ...baseData, id: userRef.id, gifts: [...gifts] };
+      saveDemo(data);
+      toast('Firebase недоступен, сохранено в демо-режиме');
+      setTimeout(() => location.href = `card.html?id=${userRef.id}`, 300);
     }
   }
 
