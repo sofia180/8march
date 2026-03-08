@@ -20,24 +20,22 @@
 
   async function verifyInitData() {
     if (!tg) return null;
-    // Если initData пусто, попробуем использовать initDataUnsafe (может работать в десктопе).
-    if (!tg.initData && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+    // 1) пробуем небезопасно (работает в десктопе/miniapp почти всегда)
+    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
       return { user: tg.initDataUnsafe.user, verified: false };
     }
-    if (!tg.initData) return null;
-    try {
-      const res = await fetch('/api/tg-verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ initData: tg.initData })
-      });
-      const data = await res.json();
-      if (data.ok) return { user: data.user, verified: true };
-    } catch (e) {
-      console.warn('tg verify failed', e);
-      // fallback: использовать initDataUnsafe без верификации
-      if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-        return { user: tg.initDataUnsafe.user, verified: false };
+    // 2) если есть initData — пытаемся подтвердить на сервере
+    if (tg.initData) {
+      try {
+        const res = await fetch('/api/tg-verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ initData: tg.initData })
+        });
+        const data = await res.json();
+        if (data.ok) return { user: data.user, verified: true };
+      } catch (e) {
+        console.warn('tg verify failed', e);
       }
     }
     return null;
@@ -188,9 +186,7 @@
     const verifyRes = await verifyInitData();
     tgUser = verifyRes && verifyRes.user;
     if (tgUser) {
-      statusEl.textContent = verifyRes.verified
-        ? `Подключено: @${tgUser.username || tgUser.id}`
-        : `Подключено (без верификации): @${tgUser.username || tgUser.id}`;
+      statusEl.textContent = `Подключено: @${tgUser.username || tgUser.id || 'user'}`;
       const nameField = document.getElementById('name');
       const photoField = document.getElementById('photo');
       if (nameField && !nameField.value) nameField.value = tgUser.username ? `@${tgUser.username}` : tgUser.first_name || '';
