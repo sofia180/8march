@@ -66,6 +66,7 @@ service cloud.firestore {
 ## Env (Vercel)
 - `TG_BOT_TOKEN` — токен бота.
 - `FRONTEND_ORIGIN` — `https://8march.extender.cards`.
+- Для загрузки аватаров нужен Firebase Storage (тот же проект).
 
 ## Фолбэк/демо
 - При недоступном Firestore включается демо-режим: тестовые пользователи в localStorage, поиск и топ не пустые.
@@ -83,3 +84,16 @@ Alias настроен на `8march.extender.cards`.
 - GA4 события (create_profile / add_gift / send_gift).
 - Ужесточить правила Firestore (валидация полей, auth).
 - Обрезка длинных ссылок в карточке подарков.
+- Добавить Storage rules (пример):
+```
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /avatars/{file} {
+      allow read: if true;
+      allow write: if request.resource.size < 3 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*|application/pdf');
+    }
+  }
+}
+```

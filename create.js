@@ -6,6 +6,8 @@
   const PHOTO_PLACEHOLDER = 'https://placehold.co/200x200?text=Wish';
   const MAX_NAME = 80;
   const MAX_ABOUT = 280;
+  const MAX_FILE = 3 * 1024 * 1024; // 3MB
+  let fileToUpload = null;
 
   function previewFromLink(url) {
     try {
@@ -23,6 +25,36 @@
     } catch (_) {
       return false;
     }
+  }
+
+  function handleFileInput(file) {
+    if (!file) return;
+    if (file.size > MAX_FILE) {
+      toast('Файл больше 3 МБ');
+      fileToUpload = null;
+      document.getElementById('photoFile').value = '';
+      return;
+    }
+    if (!(file.type.startsWith('image/') || file.type === 'application/pdf')) {
+      toast('Поддерживаются только изображения или PDF');
+      fileToUpload = null;
+      document.getElementById('photoFile').value = '';
+      return;
+    }
+    fileToUpload = file;
+  }
+
+  async function uploadFile(userId) {
+    if (!fileToUpload) return { photoUrl: null, photoPdf: null };
+    if (!firebase.storage) throw new Error('Firebase storage not loaded');
+    const isPdf = fileToUpload.type === 'application/pdf';
+    const ext = isPdf ? 'pdf' : (fileToUpload.name.split('.').pop() || 'jpg');
+    const path = `avatars/${userId}.${ext}`;
+    const storage = firebase.storage();
+    const ref = storage.ref().child(path);
+    await ref.put(fileToUpload);
+    const url = await ref.getDownloadURL();
+    return { photoUrl: isPdf ? PHOTO_PLACEHOLDER : url, photoPdf: isPdf ? url : null };
   }
 
   function renderGifts() {
@@ -103,7 +135,8 @@
       about,
       searchName: name.toLowerCase(),
       sentCount: 0,
-      createdAt: Date.now()
+      createdAt: Date.now(),
+      photoPdf: null
     };
 
     if (isDemoMode()) {
@@ -118,6 +151,16 @@
 
     if (!db) db = initFirebase().db;
     const userRef = db.collection('users').doc();
+    if (fileToUpload) {
+      try {
+        const uploaded = await uploadFile(userRef.id);
+        baseData.photo = uploaded.photoUrl || baseData.photo;
+        baseData.photoPdf = uploaded.photoPdf;
+      } catch (e) {
+        console.error(e);
+        toast('Не удалось загрузить файл');
+      }
+    }
     const batch = db.batch();
     batch.set(userRef, baseData);
     gifts.forEach(g => {
@@ -169,9 +212,15 @@
       saveProfile();
     });
 
+    const photoFileInput = document.getElementById('photoFile');
+    if (photoFileInput) {
+      photoFileInput.addEventListener('change', (e) => handleFileInput(e.target.files[0]));
+    }
+
     document.getElementById('resetForm').addEventListener('click', () => {
       document.getElementById('createForm').reset();
       gifts = [];
+      fileToUpload = null;
       renderGifts();
     });
 

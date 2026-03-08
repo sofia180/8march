@@ -14,6 +14,12 @@
     const photoEl = document.getElementById('profilePhoto');
     if (data.photo) photoEl.src = data.photo;
     else photoEl.src = 'https://placehold.co/120x120?text=Wish';
+    const socials = document.getElementById('socials');
+    if (socials) {
+      socials.innerHTML = '';
+      if (data.tgUsername) socials.innerHTML += `<span class="badge dark">@${data.tgUsername}</span>`;
+      if (data.photoPdf) socials.innerHTML += `<a class="badge dark" href="${data.photoPdf}" target="_blank" rel="noopener">PDF фото</a>`;
+    }
     document.getElementById('shareLink').value = `${location.origin}${location.pathname.replace('card.html','')}card.html?id=${userId}`;
     document.getElementById('statusBadge').textContent = t('card.status.active');
   }
