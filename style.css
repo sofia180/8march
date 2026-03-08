@@ -130,6 +130,7 @@ main { padding: 32px 24px 80px; max-width: 1200px; margin: 0 auto; }
   border: 1px solid rgba(255,255,255,0.05);
   box-shadow: var(--shadow);
   position: relative;
+  width: 100%;
 }
 .card.gift-card { padding: 0; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); }
 .gift-cover {
@@ -217,6 +218,8 @@ label { font-weight: 600; color: var(--muted); display: block; margin-bottom: 6p
   filter: drop-shadow(0 1px 2px rgba(0,0,0,0.25));
 }
 .gift-item .title { font-weight: 600; }
+.gift-item .title a { word-break: break-word; display: block; }
+.gift-item .title { word-break: break-word; }
 .gift-item .status { font-size: 12px; padding: 4px 8px; border-radius: 8px; }
 .gift-item .status.needed { background: rgba(184,193,236,0.18); color: #dbe0ff; }
 .gift-item .status.reserved { background: rgba(243,199,123,0.2); color: var(--gold); }
